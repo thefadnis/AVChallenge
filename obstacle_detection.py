@@ -2,119 +2,129 @@
 
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
-
-
 from controller import Robot, Camera, DistanceSensor,LidarPoint
 from vehicle import Driver
 
 
 
+# import cv2
+import math
 import numpy as np
-
-
 # create the Robot instance.
 robot = Driver()
+
 front_camera = robot.getCamera("front_camera")
 rear_camera = robot.getCamera("rear_camera")
 
+
 lidar = robot.getLidar("Sick LMS 291")
-
-
 
 # get the time step of the current world.
 timestep = int(robot.getBasicTimeStep())
 
+# You should insert a getDevice-like function in order to get the
+# instance of a device of the robot. Something like:
+#  motor = robot.getMotor('motorname')
+#  ds = robot.getDistanceSensor('dsname')
+#  ds.enable(timestep)
 
 
 front_camera.enable(timestep)
 rear_camera.enable(timestep)
+
+#LIDAR AND PLOTTING INITIALIZATION
+SIZES = (1, 180)
+ranges_str = "1.13114178 0.85820043 0.57785118 0.43461093 0.38639969 0.31585345 0.2667459 0.23062678 0.21593061 0.19141567 0.17178488 0.15571462 0.14872716 0.13643947 0.12597121 0.11696267"
+RANGES = [float(i) for i in ranges_str.split(' ')]
+EPSILON = 0.6
+DISPLAY_SIZE = (1024, 1024)
+DISPLAY_SCALING_FACTOR = 0.9*1024/5
+PLOT_UPDATE_RATE = 1
+
 
 lidar.enable(timestep)
 
 lidar.enablePointCloud()
 
 
+    
+############LIDAR FILTER
+def lidar_filter(imageArray, SIZES,RANGES,EPSILON):
+    theta_data = np.zeros((SIZES[1],)).tolist()
+    for layer in range(SIZES[0]):
+        for theta in range(SIZES[1]):
+                point_range = imageArray[layer][theta]
+                if(point_range < RANGES[layer]*(EPSILON)):
+                    theta_data[theta] = point_range
+    return theta_data
 
-
-
-
-#check if enable:
-# print(lidar.isPointCloudEnabled())
-
-
-########parametrs of lidar
-
-lms291_width = lidar.getHorizontalResolution()
-half_width = lms291_width / 2
-
-max_range = lidar.getMaxRange()
-range_threshold = max_range / 20.0
-
-OBSTACLE_THRESHOLD=0.01
-
-
-
-
-
-
-# // gaussian function
-def gaussian(x,mu,sigma):
-    return (1.0 / (sigma * np.sqrt(2.0 * np.pi))) * np.exp(-((x - mu) * (x - mu)) / (2 * sigma * sigma))
-
-
-braitenberg_coefficients = []
-
-for i in range(lms291_width):
-    a=gaussian(i, half_width, lms291_width / 5)
-    braitenberg_coefficients.append(a)
-
-
-
-
+############PID
+def pid(input_value,previous,setspeed):
+    stable_value=0
+    steer=0.015*input_value+1*(input_value-previous)
+    speed=abs(setspeed-abs(100*input_value))
+    # speed=setspeed
+    if abs(input_value)<=0.9:
+        robot.setBrakeIntensity(abs(input_value))
+    else:
+        robot.setBrakeIntensity(0.9)
+    if speed>setspeed:
+        speed=setspeed
+    print('input value=',input_value)
+    print('speed=',speed)
+    return steer,speed
+    
 
 
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
+angle=0
+previous=0
 while robot.step() != -1:
 
-    robot.setCruisingSpeed(50)
-    # Read the sensors:
-    # Enter here functions to read sensor data, like:
-    #  val = ds.getValue()
-
-    # Process sensor data here.
-
-    # Enter here functions to send actuator commands, like:
-    #  motor.setPosition(10.0)
     
-    lms291_values = np.array(lidar.getRangeImageArray())
+    # angle = 0.3 * math.cos(robot.getTime())
+    # robot.setSteeringAngle(angle)
+    # robot.setCruisingSpeed(40)
     
-    left_obstacle = 0.0 
-    right_obstacle = 0.0
-    for i in range(int(half_width)):
-        if (lms291_values[i] < range_threshold):
-            left_obstacle += braitenberg_coefficients[i] * (1.0 - lms291_values[i] / max_range)
-        
-        j = lms291_width - i - 1
-        
-        if (lms291_values[j] < range_threshold):
-            right_obstacle += braitenberg_coefficients[i] * (1.0 - lms291_values[j] / max_range)
+    #########################LIDAR
     
+    imageArray_1 = np.array(lidar.getRangeImageArray()).T #returns a two-dimensional list of floats
     
-    b = left_obstacle+right_obstacle
+    imageArray_2 = np.array(lidar.getRangeImage()).T #returns a one-dimensional list of floats
     
-    print(b)
-    if(b>OBSTACLE_THRESHOLD):
-        robot.setCruisingSpeed(0)
-        print("object detected")
+    imageArray_3 = np.array(lidar.getLayerRangeImage(1))#function is a convenient way of getting directly the sub range image associated with one layer.
+    
+    frontdist=np.sum(imageArray_1[0][85:95])/10
+    
+    print("front dist:",frontdist)
+    
+    if frontdist<=25:
+        setspeed=20
     else:
-        robot.setCruisingSpeed(50)
-        
-        
-    print(lidar.getNumberOfLayers())
+        setspeed=60
     
+    
+    # print(imageArray_3)
+    
+    # print(imageArray.shape)
+    # theta_data = lidar_filter(imageArray_1, SIZES,RANGES,EPSILON)
+        
+    # print(imageArray_1[0][0],imageArray_1[0][-1])
+    
+    change,speed=pid(imageArray_1[0][-1]-imageArray_1[0][0],previous,setspeed)
+    previous=imageArray_1[0][-1]-imageArray_1[0][0]
+    angle=angle+change
+    if angle>0.523:
+        angle=0.523
+    if angle<-0.523:
+        angle=-0.523
+    robot.setSteeringAngle(angle)
+    robot.setCruisingSpeed(speed)
+    
+    print("30-40:",np.sum(imageArray_1[0][30:40])/10)
+    print("140-150:",np.sum(imageArray_1[0][140:150])/10)
     
     
 
 # Enter here exit cleanup code.
-
