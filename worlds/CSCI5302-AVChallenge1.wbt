@@ -80,8 +80,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.5169396363101205 -0.8503284665232386 -0.0985642502725898 0.441162017952635
-  position -0.5404348907573588 1.5593892679102161 12.329550032203748
+  orientation -0.2933498773229232 -0.9339131817099823 -0.20433310672273242 1.2816682125512375
+  position -8.38213523206764 5.428349075411417 -2.0616072560145255
 }
 TexturedBackground {
 }
@@ -837,7 +837,7 @@ TeslaModel3 {
   ]
   sensorsSlotFront [
     SickLms291 {
-      translation 0 -0.06 0
+      translation 0 0.18 0
       rotation 0 1 0 3.14159
     }
   ]
@@ -887,7 +887,8 @@ TeslaModel3 {
       ]
       name "front_camera"
       fieldOfView 1
-      width 128
+      width 512
+      height 256
     }
   ]
   sensorsSlotCenter [
