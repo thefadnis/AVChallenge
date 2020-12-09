@@ -56,7 +56,7 @@ def process_camera_image():
         contour = contours[-2][0][0]
         line_angle = contour[0][0] - 261
     line_angle = 0 if abs(line_angle) <= 2 else line_angle
-    kp = 0.0032
+    kp = 0.0029
     op = kp*line_angle
     if line_angle!= 0:
         set_steer_angle(op)
@@ -69,7 +69,7 @@ while robot.step() != -1:
 
     # Process sensor data here.
     process_camera_image()    
-    speed = 35
+    speed = 37
     robot.setCruisingSpeed(speed)
 
     pass
