@@ -80,12 +80,17 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.9924286906912936 0.12093776018544812 0.02143249994965625 0.3534174143191461
-  position -0.1787365739699971 7.918572973913585 11.037321315548017
+  orientation -0.8475709244027345 -0.5301353624877562 -0.024083719543901157 0.10709651856757603
+  position -2.1420560685415544 6.302387085871011 29.878824889175377
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
+}
+Ball {
+  translation -0.96 1 -30
+  radius 1
+  mass 50
 }
 Fog {
   color 0.38 0.35 0.32
@@ -580,6 +585,7 @@ StraightRoadSegment {
 GenericTrafficLight {
   translation -34.1 0 177.67
   rotation 0 1 0 1.5708
+  startGreen FALSE
   greenTime 30
   state "green"
 }
@@ -825,13 +831,13 @@ Road {
   castShadows TRUE
 }
 TeslaModel3 {
-  translation -1.99594 0.273006 -0.46575
-  rotation -2.8019723308606454e-06 0.9999938096268235 0.0035186219150941 3.1400000098592225
+  translation 0.259999 0.371636 2.58635
+  rotation -2.8027694664500566e-06 0.9999938096359167 0.0035186193301771102 3.14
   color 1 0 0
   plate [
     "../textures/license.png"
   ]
-  controller "av_challenge_controller"
+  controller "obstacle_avoidance"
   controllerArgs [
     ""
   ]
