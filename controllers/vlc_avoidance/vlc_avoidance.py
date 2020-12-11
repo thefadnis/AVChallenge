@@ -12,6 +12,7 @@ import cv2
 
 # create the Robot instance.
 robot = Driver()
+driver = robot
 front_camera = robot.getCamera("front_camera")
 rear_camera = robot.getCamera("rear_camera")
 lidar = robot.getLidar("Sick LMS 291")
@@ -90,9 +91,12 @@ def process_sick_data(sick_data):
 # - perform simulation steps until Webots is stopping the controller
 def vlc_obstacle():
 
-    # robot.setCruisingSpeed(40)
+    driver.setCruisingSpeed(10)
     a=0
-    while robot.step()!= -1:
+    while driver.step()!= -1:
+    
+        sa=driver.getSteeringAngle()
+        # steeringangle.append(sa)
         
         imageArray_1 = np.array(lidar.getRangeImageArray()).T #returns a two-dimensional list of floats
         total_sum = np.sum(imageArray_1)/180
@@ -109,18 +113,18 @@ def vlc_obstacle():
     
         obstacle_ang = process_sick_data(imageArray_1[0])
         
-        # if(obstacle_ang<1):
-            # print("obst_angle:",obstacle_ang)
+        if(obstacle_ang<1):
+            print("obst_angle:",obstacle_ang)
          
         if(obstacle_ang>1):
-            robot.setCruisingSpeed(10)
+            driver.setCruisingSpeed(5)
             if(a<0):
-                robot.setSteeringAngle(-0.05)
+                driver.setSteeringAngle(-0.02)
             else:
-                robot.setSteeringAngle(0.05)
+                driver.setSteeringAngle(0.02)
         else:
-            robot.setSteeringAngle(-obstacle_ang)
+            driver.setSteeringAngle(-obstacle_ang)
             a = obstacle_ang
+    
 
-# Enter here exit cleanup code.
 vlc_obstacle()

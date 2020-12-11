@@ -81,7 +81,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.8475709244027345 -0.5301353624877562 -0.024083719543901157 0.10709651856757603
-  position -2.1420560685415544 6.302387085871011 29.878824889175377
+  position -39.130116903252244 5.612489912005131 20.637566161132224
 }
 TexturedBackground {
 }
@@ -587,7 +587,7 @@ GenericTrafficLight {
   rotation 0 1 0 1.5708
   startGreen FALSE
   greenTime 30
-  state "green"
+  state "red"
 }
 GenericTrafficLight {
   translation -46.75 0 188.1
@@ -595,7 +595,7 @@ GenericTrafficLight {
   name "generic traffic light(1)"
   startGreen FALSE
   greenTime 30
-  state "green"
+  state "red"
 }
 StopSign {
   translation -46.6615 0 101.728
@@ -831,19 +831,19 @@ Road {
   castShadows TRUE
 }
 TeslaModel3 {
-  translation 0.259999 0.371636 2.58635
+  translation -40 0.371636 0
   rotation -2.8027694664500566e-06 0.9999938096359167 0.0035186193301771102 3.14
   color 1 0 0
   plate [
     "../textures/license.png"
   ]
-  controller "obstacle_avoidance"
+  controller "vlc_avoidance"
   controllerArgs [
     ""
   ]
   sensorsSlotFront [
     SickLms291 {
-      translation 0 0.18 0
+      translation -1.3268e-07 -0.13 0.05
       rotation 0 1 0 3.14159
     }
   ]
